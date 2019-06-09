@@ -53,18 +53,33 @@
 
             app.controller('ProdutosController', function ($scope, ProdutosService) {
                 var novo = true;
-
                 $scope.produto = {};
-                
-                $scope.produtos = ProdutosService.listar();
+                var salvar;
+                var salvar;
+
+
+                listar();
+
+                function listar() {
+                    ProdutosService.listar().then(function (res) {
+                        $scope.produtos = res.data;
+                    });
+                }
+
                 $scope.salvar = function (produto) {
-                    ProdutosService.salvar(produto, novo);
+                    ProdutosService.salvar(produto, novo).then(function (res) {
+                        listar();
+                        console.log(res);
+                    });
                     $scope.produto = {};
                     novo = true;
                 };
 
                 $scope.excluir = function (produto) {
-                   ProdutosService.excluir(produto);
+                    ProdutosService.excluir(produto).then(function (res) {
+                        listar();
+                        console.log(res);
+                    });
                 };
 
                 $scope.editar = function (produto) {
@@ -76,44 +91,22 @@
                 };
             });
 
-            app.service('ProdutosService', function () {
-                var produtos = [{
-                        id: 1,
-                        descricao: 'Arroz',
-                        preco: 3.50
-                    },
-                    {
-                        id: 2,
-                        descricao: 'Feijão',
-                        preco: 2.50
-                    }];
-                
-                this.listar = function(){
-                    return produtos;
+            app.service('ProdutosService', function ($http) {
+                var api = 'http://localhost:3000/produtos';
+                this.listar = function () {
+                    return $http.get(api);
                 }
-                
-                this.salvar = function(produto, novo){
+
+                this.salvar = function (produto, novo) {
                     if (!novo) {
-                        produtos.forEach(p => {
-                            if (p.id === produto.id) {
-                                p.descricao = produto.descricao;
-                                p.preco = produto.preco;
-                                return false;
-                            }
-                        });
+                        return $http.put(api + "/" + produto.id, produto);
                     } else {
-                        produto.id = produtos[produtos.length - 1].id + 1;
-                        produtos.push(produto);
+                        return $http.post(api, produto);
                     }
                 }
-                
-                this.excluir = function(produto){
-                     produtos.forEach(function (p, i) {
-                        if (p.id === produto.id) {
-                            produtos.splice(i, 1);
-                            return false;
-                        }
-                    });
+
+                this.excluir = function (produto) {
+                    return $http.delete(api + "/" + produto.id);
                 }
             });
         </script>
