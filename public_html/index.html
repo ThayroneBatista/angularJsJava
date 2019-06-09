@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html data-ng-app="produtosApp">
+    <head>
+        <title>Angular JS + Java</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body data-ng-controller="ProdutosController">
+        <form>
+            <label for="codigo">Codigo: </label>
+            <input id="codigo" name="codigo" type="text" data-ng-model="produto.id" readonly/>
+            <br>
+            <br>
+            <label for="descricao">Descrição: </label>
+            <input id="descricao" name="descricao" type="text" data-ng-model="produto.descricao"/>
+            <br>
+            <br>
+            <label for="preco">Preço: </label>
+            <input id="preco" name="preco" type="text" data-ng-model="produto.preco"/>
+            <br>
+            <br>
+            <button data-ng-click="salvar(produto)">Salvar</button>
+            <button data-ng-click="cancelar()">Cancelar</button>
+        </form>
+
+        <hr>
+        <h1>Tabela de produtos</h1>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Descrição</th>
+                    <th>Preço</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-ng-repeat="produto in produtos track by $index"> 
+                    <td>{{produto.id}}</td>
+                    <td>{{produto.descricao}}</td>
+                    <td>{{produto.preco}}</td>
+                    <td><button data-ng-click="editar(produto)">Editar</button></td>
+                    <td><button data-ng-click="excluir(produto)">Excluir</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <script src="js/angular.min.js"></script>
+        <script>
+            var app = angular.module('produtosApp', []);
+
+            app.controller('ProdutosController', function ($scope) {
+                var produtos = [{
+                        id: 1,
+                        descricao: 'Arroz',
+                        preco: 3.50
+                    },
+                    {
+                        id: 2,
+                        descricao: 'Feijão',
+                        preco: 2.50
+                    }];
+                var novo = true;
+
+                $scope.produto = {};
+                $scope.produtos = produtos;
+                $scope.salvar = function (produto) {
+                    if (!novo) {
+                        produtos.forEach(p => {
+                            if (p.id === produto.id) {
+                                p.descricao = produto.descricao;
+                                p.preco = produto.preco;
+                                return false;
+                            }
+                        });
+                        novo = true;
+                    } else {
+                        produto.id = produtos[produtos.length - 1].id + 1;
+                        produtos.push(produto);
+                    }
+                    $scope.produto = {};
+                };
+
+                $scope.excluir = function (produto) {
+                    produtos.forEach(function(p, i) {
+                        if (p.id === produto.id) {
+                            produtos.splice(i, 1);
+                            return false;
+                        }
+                    });
+                };
+
+                $scope.editar = function (produto) {
+                    $scope.produto = angular.copy(produto);
+                    novo = false;
+                };
+                $scope.cancelar = function () {
+                    $scope.produto = {};
+                };
+            });
+        </script>
+    </body>
+</html>
