@@ -51,7 +51,32 @@
         <script>
             var app = angular.module('produtosApp', []);
 
-            app.controller('ProdutosController', function ($scope) {
+            app.controller('ProdutosController', function ($scope, ProdutosService) {
+                var novo = true;
+
+                $scope.produto = {};
+                
+                $scope.produtos = ProdutosService.listar();
+                $scope.salvar = function (produto) {
+                    ProdutosService.salvar(produto, novo);
+                    $scope.produto = {};
+                    novo = true;
+                };
+
+                $scope.excluir = function (produto) {
+                   ProdutosService.excluir(produto);
+                };
+
+                $scope.editar = function (produto) {
+                    $scope.produto = angular.copy(produto);
+                    novo = false;
+                };
+                $scope.cancelar = function () {
+                    $scope.produto = {};
+                };
+            });
+
+            app.service('ProdutosService', function () {
                 var produtos = [{
                         id: 1,
                         descricao: 'Arroz',
@@ -62,11 +87,12 @@
                         descricao: 'Feijão',
                         preco: 2.50
                     }];
-                var novo = true;
-
-                $scope.produto = {};
-                $scope.produtos = produtos;
-                $scope.salvar = function (produto) {
+                
+                this.listar = function(){
+                    return produtos;
+                }
+                
+                this.salvar = function(produto, novo){
                     if (!novo) {
                         produtos.forEach(p => {
                             if (p.id === produto.id) {
@@ -75,30 +101,20 @@
                                 return false;
                             }
                         });
-                        novo = true;
                     } else {
                         produto.id = produtos[produtos.length - 1].id + 1;
                         produtos.push(produto);
                     }
-                    $scope.produto = {};
-                };
-
-                $scope.excluir = function (produto) {
-                    produtos.forEach(function(p, i) {
+                }
+                
+                this.excluir = function(produto){
+                     produtos.forEach(function (p, i) {
                         if (p.id === produto.id) {
                             produtos.splice(i, 1);
                             return false;
                         }
                     });
-                };
-
-                $scope.editar = function (produto) {
-                    $scope.produto = angular.copy(produto);
-                    novo = false;
-                };
-                $scope.cancelar = function () {
-                    $scope.produto = {};
-                };
+                }
             });
         </script>
     </body>
